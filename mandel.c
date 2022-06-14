@@ -27,7 +27,7 @@ void show_help(){
     printf("Use: mandel [options]\n");
     printf("Where options are:\n");
     printf("-n <threads>    Set the number of threads to be used. (default=1)\n");
-    printf("-m <max_interations>        The max_interationsimum number of iterations per point. (default=1000)\n");
+    printf("-m <max_interations>        The max_interations is the number of iterations per point. (default=1000)\n");
     printf("-x <coord>      X coordinate of image center point. (default=0)\n");
     printf("-y <coord>      Y coordinate of image center point. (default=0)\n");
     printf("-s <scale>      Scale of the image in Mandlebrot coordinates. (default=4)\n");
@@ -106,10 +106,12 @@ int main( int argc, char *argv[] ){
 
     // Set up pthreads and related argument structs
     struct thread_arguements *thread_arguements_array = malloc(sizeof(struct thread_arguements) * num_threads);
+
     pthread_t *threads = malloc(sizeof(pthread_t) * num_threads);
 
     int t, ret;
-    for(t = 0; t < num_threads; t++){
+    for(t = 0; t < num_threads; t++)
+    {
         thread_arguements_array[t].thread_id = t;
         thread_arguements_array[t].num_threads = num_threads;
         thread_arguements_array[t].bm = bm;
@@ -121,22 +123,26 @@ int main( int argc, char *argv[] ){
 
         // Compute the Mandelbrot image portions
         ret = pthread_create(&threads[t], NULL, (void *) compute_image, (void *) &thread_arguements_array[t]);
-        if(ret){
+        if(ret)
+        {
             fprintf(stderr, "Unable to create thread; return code: %d\n", ret);
             exit(1);
         }
     }
     // Wait for the threads and join
-    for(t = 0; t < num_threads; t++){
+    for(t = 0; t < num_threads; t++)
+    {
        ret = pthread_join(threads[t], NULL);
-       if(ret){
+       if(ret)
+       {
           fprintf(stderr, "Return code from pthread_join() is %d\n", ret);
           exit(1);
         }
     }
 
     // Save the image in the stated file.
-    if(!bitmap_save(bm, outfile)){
+    if(!bitmap_save(bm, outfile))
+    {
         fprintf(stderr, "mandel: couldn't write to %s: %s\n", outfile, strerror(errno));
         return 1;
     }
@@ -159,7 +165,8 @@ int main( int argc, char *argv[] ){
 Compute an entire Mandelbrot image, writing each point to the given bitmap.
 Scale the image to the range (xmin-xmax,ymin-ymax_interations), limiting iterations to "max_interations"
 */
-void *compute_image(void *thread_arguements){
+void *compute_image(void *thread_arguements)
+{
     struct thread_arguements *args;
     args = (struct thread_arguements *) thread_arguements;
 
@@ -181,8 +188,10 @@ void *compute_image(void *thread_arguements){
     }
 
     // For every pixel that the thread is assigned...
-    for(j = start; j < end; j++) {
-        for(i = 0; i < width; i++) {
+    for(j = start; j < end; j++) 
+    {
+        for(i = 0; i < width; i++) 
+        {
 
             // Determine the point in x,y space for that pixel.
             double x = args->xmin + i*(args->xmax - args->xmin) / width;
@@ -202,13 +211,15 @@ void *compute_image(void *thread_arguements){
 Return the number of iterations at point x, y
 in the Mandelbrot space, up to a max_interationsimum of max_interations.
 */
-int iterations_at_point(double x, double y, int max_interations){
+int iterations_at_point(double x, double y, int max_interations)
+{
     double x0 = x;
     double y0 = y;
 
     int iter = 0;
 
-    while((x*x + y*y <= 4) && iter < max_interations){
+    while((x*x + y*y <= 4) && iter < max_interations)
+    {
         double xt = x*x - y*y + x0;
         double yt = 2*x*y + y0;
         x = xt;
@@ -220,7 +231,8 @@ int iterations_at_point(double x, double y, int max_interations){
 /*
 Convert a iteration number to an RGBA color.
 */
-int iteration_to_color(int i, int max_interations){
+int iteration_to_color(int i, int max_interations)
+{
     int r = 55 * i / max_interations;
     int g = 155 * i / max_interations;
     int b = 255 * i / max_interations;
